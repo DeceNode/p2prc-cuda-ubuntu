@@ -1,0 +1,46 @@
+---
+
+- hosts: localhost
+
+  tasks:
+    - name: Install Curl
+      shell: apt update && apt install -y curl
+      become: true
+
+    - name: Install Miniconda
+      shell: curl https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -o Miniconda3-latest-Linux-x86_64.sh
+      become: true
+    
+    - name: Start Miniconda
+      shell: | 
+             bash ./Miniconda3-latest-Linux-x86_64.sh -b
+             . ~/miniconda3/bin/activate
+      become: true
+    
+    - name: Install CUDA and CUDNN
+      shell: yes | conda install -c  conda-forge cudatoolkit=11.2 cudnn=8.1.0
+      become: true
+
+    - name: Export Config
+      shell: export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$CONDA_PREFIX/lib/
+      become: true
+    
+    - name: Export CONDA PREFIX Variable
+      shell: mkdir -p $CONDA_PREFIX/etc/conda/activate.d
+      become: true
+    
+    - name: Export Library Path
+      shell: echo 'export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$CONDA_PREFIX/lib/' > $CONDA_PREFIX/etc/conda/activate.d/env_vars.sh
+      become: true
+    
+    - name: Upgrade PIP
+      shell: pip install --upgrade pip
+      become: true
+
+    - name: Install Tensorflow GPU
+      shell: pip install tensorflow-gpu
+      become: true
+    
+    - name: Install PyTorch GPU
+      shell: pip install torch==1.11.0+cu113 torchvision==0.12.0+cu113 torchaudio==0.11.0+cu113 -f https://download.pytorch.org/whl/torch_stable.html
+      become: true
