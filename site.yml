@@ -1,46 +1,82 @@
 ---
 
-- hosts: localhost
+- hosts: all
 
   tasks:
     - name: Install Curl
       shell: apt update && apt install -y curl
       become: true
 
-    - name: Install Miniconda
-      shell: curl https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -o Miniconda3-latest-Linux-x86_64.sh
-      become: true
-    
-    - name: Start Miniconda
-      shell: | 
-             bash ./Miniconda3-latest-Linux-x86_64.sh -b
-             . ~/miniconda3/bin/activate
-      become: true
-    
+    - name: Install Conda
+      block:
+
+        - name: Download Miniconda
+          get_url:
+            url: https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh
+            dest: /tmp/install-miniconda.sh
+            checksum: md5:e01420f221a7c4c6cde57d8ae61d24b5
+            mode: 0550
+
+        - name: Create conda folder
+          become: True
+          file:
+            path: /home/master/miniconda3
+            state: directory
+            owner: master
+            mode: 755
+            recurse: yes
+
+        - name: Run the installer
+          shell: /tmp/install-miniconda.sh -b -u -f -p /home/master/miniconda3
+          ignore_errors: true
+
+        - name: Remove the installer
+          file:
+            state: absent
+            path: /tmp/install-miniconda.sh
+
+        - name: Add miniconda bin to path
+          become: True
+          shell: echo 'export PATH=/home/master/miniconda3/bin:$PATH' >> /etc/profile
+
+        - name: conda - read permission for all
+          become: True
+          file:
+            path: /home/master/miniconda3
+            mode: +r
+            recurse: yes
+
+        - name: conda - execution permission for all
+          become: True
+          file:
+            path: /home/master/miniconda3/bin
+            mode: +x
+            recurse: yes
+
     - name: Install CUDA and CUDNN
-      shell: yes | conda install -c  conda-forge cudatoolkit=11.2 cudnn=8.1.0
+      shell: . /home/master/miniconda3/bin/activate && yes | conda install -c  conda-forge cudatoolkit=11.2 cudnn=8.1.0
       become: true
 
     - name: Export Config
-      shell: export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$CONDA_PREFIX/lib/
+      shell: . /home/master/miniconda3/bin/activate && export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$CONDA_PREFIX/lib/
       become: true
     
     - name: Export CONDA PREFIX Variable
-      shell: mkdir -p $CONDA_PREFIX/etc/conda/activate.d
+      shell: . /home/master/miniconda3/bin/activate && mkdir -p $CONDA_PREFIX/etc/conda/activate.d
       become: true
     
     - name: Export Library Path
-      shell: echo 'export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$CONDA_PREFIX/lib/' > $CONDA_PREFIX/etc/conda/activate.d/env_vars.sh
+      shell: . /home/master/miniconda3/bin/activate && echo 'export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$CONDA_PREFIX/lib/' > $CONDA_PREFIX/etc/conda/activate.d/env_vars.sh
       become: true
     
     - name: Upgrade PIP
-      shell: pip install --upgrade pip
+      shell: . /home/master/miniconda3/bin/activate && pip install --upgrade pip
       become: true
 
     - name: Install Tensorflow GPU
-      shell: pip install tensorflow-gpu
+      shell: . /home/master/miniconda3/bin/activate && pip install tensorflow-gpu
       become: true
     
     - name: Install PyTorch GPU
-      shell: pip install torch==1.11.0+cu113 torchvision==0.12.0+cu113 torchaudio==0.11.0+cu113 -f https://download.pytorch.org/whl/torch_stable.html
+      shell: . /home/master/miniconda3/bin/activate && pip install torch==1.11.0+cu113 torchvision==0.12.0+cu113 torchaudio==0.11.0+cu113 -f https://download.pytorch.org/whl/torch_stable.html
       become: true
