@@ -80,3 +80,7 @@
     - name: Install PyTorch GPU
       shell: . /home/master/miniconda3/bin/activate && pip install torch==1.11.0+cu113 torchvision==0.12.0+cu113 torchaudio==0.11.0+cu113 -f https://download.pytorch.org/whl/torch_stable.html
       become: true
+
+    - name: Install JupyterLab and VSCode Server Plugin
+      shell: . /home/master/miniconda3/bin/activate &&  yes | conda install -c  conda-forge jupyterlab code-server
+      become: true
