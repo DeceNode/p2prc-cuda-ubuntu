@@ -12,9 +12,9 @@
 
         - name: Download Miniconda
           get_url:
-            url: https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh
+            url: https://github.com/conda-forge/miniforge/releases/latest/download/Mambaforge-Linux-x86_64.sh
             dest: /tmp/install-miniconda.sh
-            checksum: md5:e01420f221a7c4c6cde57d8ae61d24b5
+            checksum: md5:9dea0dd8a73cbb2801c4bc9d225f1ad0
             mode: 0550
 
         - name: Create conda folder
@@ -52,10 +52,19 @@
             path: /home/master/miniconda3/bin
             mode: +x
             recurse: yes
+        
+        - name: conda - write permission for all
+          become: True
+          file:
+            path: /home/master/miniconda3
+            mode: +w
+            recurse: yes
 
-    - name: Install CUDA and CUDNN
-      shell: . /home/master/miniconda3/bin/activate && yes | conda install -c  conda-forge cudatoolkit=11.2 cudnn=8.1.0
+
+    - name: Install DS Toolkit, CUDA, CUDNN, Tensorflow GPU, PyTorch GPU, JupyterLab and Code Server
+      shell: . /home/master/miniconda3/bin/activate && yes | mamba install cudatoolkit cudnn numpy pandas scikit-learn matplotlib seaborn pillow beautifulsoup4 scrapy nltk scipy tensorflow-gpu pytorch torchvision jupyterlab code-server
       become: true
+      ignore_errors: true
 
     - name: Export Config
       shell: . /home/master/miniconda3/bin/activate && export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$CONDA_PREFIX/lib/
@@ -67,20 +76,4 @@
     
     - name: Export Library Path
       shell: . /home/master/miniconda3/bin/activate && echo 'export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$CONDA_PREFIX/lib/' > $CONDA_PREFIX/etc/conda/activate.d/env_vars.sh
-      become: true
-    
-    - name: Upgrade PIP
-      shell: . /home/master/miniconda3/bin/activate && pip install --upgrade pip
-      become: true
-
-    - name: Install Tensorflow GPU
-      shell: . /home/master/miniconda3/bin/activate && pip install tensorflow-gpu
-      become: true
-    
-    - name: Install PyTorch GPU
-      shell: . /home/master/miniconda3/bin/activate && pip install torch==1.11.0+cu113 torchvision==0.12.0+cu113 torchaudio==0.11.0+cu113 -f https://download.pytorch.org/whl/torch_stable.html
-      become: true
-
-    - name: Install JupyterLab and VSCode Server Plugin
-      shell: . /home/master/miniconda3/bin/activate &&  yes | conda install -c  conda-forge jupyterlab code-server
       become: true
