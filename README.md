@@ -1,1 +1,1 @@
-# p2prc-cuda-ubuntu
+# p2prc-gpu-machine-setup
