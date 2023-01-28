@@ -1,5 +1,5 @@
 {
-    "Name":"Nvidia CUDA Pre-packaged with DS Libraries, TF-GPU, and PyTorch GPU",
+    "Name":"GPU Setup - Nvidia CUDA Pre-packaged with DS Libraries, TF-GPU, and PyTorch GPU",
     "Category":"Development Tool",
     "About":"CUDA (or Compute Unified Device Architecture) is a parallel computing platform and application programming interface (API) that allows software to use certain types of graphics processing units (GPUs) for general purpose processing, an approach called general-purpose computing on GPUs (GPGPU).",
     "Logo":"https://upload.wikimedia.org/wikipedia/sco/2/21/Nvidia_logo.svg"
