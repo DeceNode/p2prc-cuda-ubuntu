@@ -14,7 +14,6 @@
           get_url:
             url: https://github.com/conda-forge/miniforge/releases/latest/download/Mambaforge-Linux-x86_64.sh
             dest: /tmp/install-miniconda.sh
-            checksum: md5:9dea0dd8a73cbb2801c4bc9d225f1ad0
             mode: 0550
 
         - name: Create conda folder
